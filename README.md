@@ -67,3 +67,11 @@ This work builds on many of the excellent works:
 
 ## Reference
 [1] Stewart, Russell, Mykhaylo Andriluka, and Andrew Y. Ng. "End-to-end people detection in crowded scenes." Proceedings of the IEEE conference on computer vision and pattern recognition. 2016.
+
+## MOBI
+
+https://stackoverflow.com/questions/65695724/error-pythreadstate-aka-struct-ts-has-no-member-named-exc-type-did-yo
+
+https://askubuntu.com/questions/883109/fatal-error-numpy-arrayobject-h-no-such-file-or-directory
+
+https://www.datasciencelearner.com/assertionerror-torch-not-compiled-with-cuda-enabled-fix/
