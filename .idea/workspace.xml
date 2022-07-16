@@ -2,7 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b28ee08c-07e6-4022-9a4b-d93e17bc3947" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/head_detection_demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/head_detection_demo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/man.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/creator_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/creator_tool.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nms/_nms_gpu_post.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/nms/_nms_gpu_post.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nms/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nms/build.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nms/non_maximum_suppression.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nms/non_maximum_suppression.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +26,13 @@
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "last_opened_file_path": "/home/c/Documents/MOBI/head_detection_demo.py",
+    "settings.editor.selected.configurable": "preferences.keymap",
+    "two.files.diff.last.used.file": "/home/c/Documents/MOBI/head_detection_demo.py"
+  }
+}]]></component>
   <component name="TaskManager">
     <servers />
   </component>
