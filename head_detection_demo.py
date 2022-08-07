@@ -13,8 +13,66 @@ import src.array_tool as at
 from src.vis_tool import visdom_bbox
 import argparse
 import src.utils as utils
+from tkinter import *
 from src.config import opt
 import time
+from PIL import ImageTk, Image
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+from tkinter import ttk
+
+
+class DisplayPhotoEventHandler(FileSystemEventHandler):
+    def __init__(self, label, watch_file, model_path, head_detector, trainer):
+        self.label = label
+        self.watch_file = watch_file
+        self.model_path = model_path
+        self.head_detector = head_detector
+        self.trainer = trainer
+
+    def on_any_event(self, event):
+        print(event.event_type, event.src_path)
+        if (not event.is_directory) and (event.event_type == 'created'):
+            print('modified: ' + event.src_path)
+            try:
+                global file
+                file = self.watch_file
+
+                file_id = utils.get_file_id(event.src_path)
+                img, img_raw, scale = read_img(event.src_path)
+                self.trainer.load(self.model_path)
+                img = at.totensor(img)
+                img = img[None, :, :, :]
+                img = img.cuda().float()
+                st = time.time()
+                pred_bboxes_, _ = self.head_detector.predict(img, scale, mode='evaluate', thresh=0.01)
+                et = time.time()
+                tt = et - st
+                print("[INFO] Head detection over. Time taken: {:.4f} s".format(tt))
+                for i in range(pred_bboxes_.shape[0]):
+                    ymin, xmin, ymax, xmax = pred_bboxes_[i, :]
+                    utils.draw_bounding_box_on_image_array(img_raw, ymin / scale, xmin / scale, ymax / scale,
+                                                           xmax / scale)
+
+                # uncomment this to resize final image.
+                plt.axis('off')
+                plt.imshow(img_raw)
+                # if SAVE_FLAG == 1:
+                if not os.path.exists(opt.test_output_path):  # Create the directory
+                    os.makedirs(opt.test_output_path)  # If it doesn't exist
+
+                output_file_path = os.path.join(opt.test_output_path, file_id + '.png')
+                plt.savefig(output_file_path, bbox_inches='tight',
+                            pad_inches=0)
+                # else:
+                #     plt.show()
+
+                local_img = ImageTk.PhotoImage(Image.open(output_file_path).resize((1000, 1000)))
+                self.label.configure(image=local_img)
+                self.label.image = local_img
+
+            except KeyboardInterrupt:
+                pass
 
 
 def read_img(path, IM_RESIZE=False):
@@ -35,40 +93,55 @@ def read_img(path, IM_RESIZE=False):
     return img, img_raw_final, scale
 
 
-def detect(img_path, model_path, SAVE_FLAG=0, THRESH=0.01):
-    file_id = utils.get_file_id(img_path)
-    img, img_raw, scale = read_img(img_path)
-    head_detector = Head_Detector_VGG16(ratios=[1], anchor_scales=[2,4])
+def detect(img_path, model_path, watch_file, SAVE_FLAG=0, THRESH=0.01):
+
+    # display points -------------
+    root = Tk()
+    root.geometry('1200x1200+4200+4200')
+    # root.attributes('-fullscreen', True)
+    root.title("")
+    root.configure(background='black')
+
+    head_detector = Head_Detector_VGG16(ratios=[1], anchor_scales=[2, 4])
     trainer = Head_Detector_Trainer(head_detector).cuda()
-    trainer.load(model_path)
-    img = at.totensor(img)
-    img = img[None, : ,: ,:]
-    img = img.cuda().float()
-    st = time.time()
-    pred_bboxes_, _ = head_detector.predict(img, scale, mode='evaluate', thresh=THRESH)
-    et = time.time()
-    tt = et - st
-    print ("[INFO] Head detection over. Time taken: {:.4f} s".format(tt))
-    for i in range(pred_bboxes_.shape[0]):
-        ymin, xmin, ymax, xmax = pred_bboxes_[i,:]
-        utils.draw_bounding_box_on_image_array(img_raw, ymin/scale, xmin/scale, ymax/scale, xmax/scale)
-    plt.axis('off')
-    plt.imshow(img_raw)
-    if SAVE_FLAG == 1:
-        if not os.path.exists(opt.test_output_path):  # Create the directory
-            os.makedirs(opt.test_output_path)  # If it doesn't exist
 
-        plt.savefig(os.path.join(opt.test_output_path, file_id+'.png'), bbox_inches='tight', pad_inches=0)
-    else:
-        plt.show()
+    try:
+        img = ImageTk.PhotoImage(Image.open(img_path))
+        # img = ImageTk.PhotoImage(Image.open('projector/1.jpg'))
+        label = ttk.Label(root, image=img, borderwidth=0)
+        label.place(x=10, y=10)
 
+        event_handler = DisplayPhotoEventHandler(label, watch_file, model_path, head_detector, trainer)
+        observer = Observer()
+        observer.schedule(event_handler, watch_file, recursive=True)
+        observer.start()
+
+        root.mainloop()
+
+    except KeyboardInterrupt:
+        pass
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+
+    print('end detect')
+
+    # -----------------
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, help="test image path")
     parser.add_argument("--model_path", type=str, default='./checkpoints/head_detector_final')
+    parser.add_argument("--watch_file", type=str, default='./input/2.jpg')
     args = parser.parse_args()
-    detect(args.img_path, args.model_path, SAVE_FLAG=1)
+
+    global file
+    file = args.img_path
+    detect(file, args.model_path, args.watch_file, SAVE_FLAG=1)
     # model_path = './checkpoints/sess:2/head_detector08120858_0.682282441835'
 
     # test_data_list_path = os.path.join(opt.data_root_path, 'brainwash_test.idl')

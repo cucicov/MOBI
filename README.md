@@ -92,3 +92,6 @@ https://stackoverflow.com/questions/65695724/error-pythreadstate-aka-struct-ts-h
 https://askubuntu.com/questions/883109/fatal-error-numpy-arrayobject-h-no-such-file-or-directory
 
 https://www.datasciencelearner.com/assertionerror-torch-not-compiled-with-cuda-enabled-fix/
+
+-----
+python head_detection_demo.py --img_path 2.jpg
