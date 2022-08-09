@@ -22,8 +22,8 @@ from watchdog.events import FileSystemEventHandler
 from tkinter import ttk
 from random import random
 
-global pos
-pos = (0, 0)
+global prev_pos
+prev_pos = []
 
 
 class DisplayPhotoEventHandler(FileSystemEventHandler):
@@ -47,21 +47,56 @@ class DisplayPhotoEventHandler(FileSystemEventHandler):
                 img = img[None, :, :, :]
                 img = img.cuda().float()
                 st = time.time()
-                pred_bboxes_, _ = self.head_detector.predict(img, scale, mode='evaluate', thresh=0.01)
+                pred_bboxes_, _ = self.head_detector.predict(img, scale, mode='evaluate', thresh=0.05)
                 et = time.time()
                 tt = et - st
                 print("[INFO] Head detection over. Time taken: {:.4f} s".format(tt))
 
+                # if less elements are detected than in pos, remove last elements from pos to normalize.
+                global prev_pos
+                if pred_bboxes_.shape[0] < len(prev_pos):
+                    del prev_pos[pred_bboxes_.shape[0] - len(prev_pos)]
+
                 # clear canvas before drawing new circle.
                 self.canva.delete("all")
                 for i in range(pred_bboxes_.shape[0]):
-                    ymin, xmin, ymax, xmax = pred_bboxes_[i, :]
 
-                    color = "white"
-                    if i == 1:
-                        color = "red"
-                    self.canva.create_oval(xmin / scale, ymin / scale, (xmin / scale) + 10,
-                                           (ymin / scale) + 10, fill=color)
+                    ymin, xmin, ymax, xmax = pred_bboxes_[i, :]
+                    current_pos = (int(xmin), int(ymin))
+
+                    print(prev_pos, current_pos)
+
+                    # if more elements are detected, add last in pos history
+                    if len(prev_pos) <= i:
+                        prev_pos.append(current_pos)
+
+                    pos = prev_pos[i]
+                    while pos != current_pos:
+                        # print("start loop")
+                        self.canva.delete("all")
+                        diff_pos = tuple(map(lambda i, j: i - j, pos, current_pos))
+                        pos = tuple(map(lambda i, j, k: i - (j / abs(j)) if i != k and abs(j) != 0 else i,
+                                        pos, diff_pos, current_pos))
+
+                        prev_pos[i] = pos
+
+                        pos_x = translate(pos[0], 70, 800, 0, 640)
+                        pos_y = translate(pos[1], 0, 108, 0, 480)
+                        self.canva.create_oval((pos_x / scale) + random() * 2, (pos_y / scale) + random() * 2,
+                                               ((pos_x / scale) + 10) + random() * 2,
+                                               ((pos_y / scale) + 10) + random() * 2, fill="gray")
+
+                        # print("sleep:" + str(abs(0.1 / max(diff_pos))))
+                        max_diff = 1 if max(diff_pos) == 0 else max(diff_pos)
+                        # print("sleep:" + str(min(abs(0.1 / max_diff), 0.05)))
+                        time.sleep(min(abs(0.1 / max_diff), random()/300))
+
+                    pos_x = translate(xmin, 70, 800, 0, 640)
+                    pos_y = translate(ymin, 0, 108, 0, 480)
+                    self.canva.create_oval((pos_x / scale), (pos_y / scale),
+                                           ((pos_x / scale) + 10),
+                                           ((pos_y / scale) + 10), fill="white")
+
                     utils.draw_bounding_box_on_image_array(img_raw, ymin / scale, xmin / scale, ymax / scale,
                                                            xmax / scale)
 
@@ -111,6 +146,7 @@ class DisplayPhotoEventHandler(FileSystemEventHandler):
                 output_file_path = os.path.join(opt.test_output_path, file_id + '.png')
                 plt.savefig(output_file_path, bbox_inches='tight',
                             pad_inches=0)
+
                 # else:
                 #     plt.show()
 

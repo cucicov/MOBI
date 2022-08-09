@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b28ee08c-07e6-4022-9a4b-d93e17bc3947" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/head_detection_demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/head_detection_demo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/input/2.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/input/2.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/output/2.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/2.png" afterDir="false" />
@@ -81,7 +80,7 @@
       <workItem from="1659862065866" duration="8772000" />
       <workItem from="1659873203532" duration="599000" />
       <workItem from="1660032332169" duration="7787000" />
-      <workItem from="1660045031987" duration="21734000" />
+      <workItem from="1660045031987" duration="24543000" />
     </task>
     <servers />
   </component>
@@ -104,22 +103,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/head_detection_demo.py</url>
-          <line>79</line>
+          <line>114</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/head_detection_demo.py</url>
-          <line>73</line>
+          <line>108</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/head_detection_demo.py</url>
-          <line>68</line>
+          <line>103</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/head_detection_demo.py</url>
-          <line>124</line>
+          <line>160</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
