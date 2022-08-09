@@ -94,4 +94,11 @@ https://askubuntu.com/questions/883109/fatal-error-numpy-arrayobject-h-no-such-f
 https://www.datasciencelearner.com/assertionerror-torch-not-compiled-with-cuda-enabled-fix/
 
 -----
-python head_detection_demo.py --img_path 2.jpg
+# start webcam display and saving files for processing
+python webcam.py
+
+# start head detection
+python head_detection_demo.py --img_path input/2.jpg
+
+# display head detection in separate window
+python display.py --watch_file output/2.png

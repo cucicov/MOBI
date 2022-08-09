@@ -20,20 +20,22 @@ from PIL import ImageTk, Image
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from tkinter import ttk
+from random import random
+
+global pos
+pos = (0, 0)
 
 
 class DisplayPhotoEventHandler(FileSystemEventHandler):
-    def __init__(self, label, watch_file, model_path, head_detector, trainer):
-        self.label = label
+    def __init__(self, canva, watch_file, model_path, head_detector, trainer):
+        self.canva = canva
         self.watch_file = watch_file
         self.model_path = model_path
         self.head_detector = head_detector
         self.trainer = trainer
 
     def on_any_event(self, event):
-        print(event.event_type, event.src_path)
-        if (not event.is_directory) and (event.event_type == 'created'):
-            print('modified: ' + event.src_path)
+        if (not event.is_directory) and (event.event_type == 'closed'):
             try:
                 global file
                 file = self.watch_file
@@ -49,10 +51,55 @@ class DisplayPhotoEventHandler(FileSystemEventHandler):
                 et = time.time()
                 tt = et - st
                 print("[INFO] Head detection over. Time taken: {:.4f} s".format(tt))
+
+                # clear canvas before drawing new circle.
+                self.canva.delete("all")
                 for i in range(pred_bboxes_.shape[0]):
                     ymin, xmin, ymax, xmax = pred_bboxes_[i, :]
+
+                    color = "white"
+                    if i == 1:
+                        color = "red"
+                    self.canva.create_oval(xmin / scale, ymin / scale, (xmin / scale) + 10,
+                                           (ymin / scale) + 10, fill=color)
                     utils.draw_bounding_box_on_image_array(img_raw, ymin / scale, xmin / scale, ymax / scale,
                                                            xmax / scale)
+
+                # if (len(pred_bboxes_) != 0):
+                #     ymin, xmin, ymax, xmax = pred_bboxes_[0, :]
+                #     current_pos = (int(xmin), int(ymin))
+                #
+                #     print(current_pos)
+                #
+                #     global pos
+                #
+                #     # here iterate over previous position and diff position incrementing by +/- 1 to reach current pos.
+                #     while pos != current_pos:
+                #         # print("start loop")
+                #         self.canva.delete("all")
+                #         diff_pos = tuple(map(lambda i, j: i - j, pos, current_pos))
+                #         pos = tuple(map(lambda i, j, k: i - (j / abs(j)) if i != k and abs(j) != 0 else i,
+                #                         pos, diff_pos, current_pos))
+                #
+                #         pos_x = translate(pos[0], 70, 800, 0, 640)
+                #         pos_y = translate(pos[1], 0, 108, 0, 480)
+                #         self.canva.create_oval((pos_x / scale) + random() * 2, (pos_y / scale) + random() * 2,
+                #                                ((pos_x / scale) + 10) + random() * 2,
+                #                                ((pos_y / scale) + 10) + random() * 2, fill="gray")
+                #
+                #         # print("sleep:" + str(abs(0.1 / max(diff_pos))))
+                #         max_diff = 1 if max(diff_pos) == 0 else max(diff_pos)
+                #         # print("sleep:" + str(min(abs(0.1 / max_diff), 0.05)))
+                #         time.sleep(min(abs(0.1 / max_diff), random()/500))
+                #
+                #     pos_x = translate(xmin, 70, 800, 0, 640)
+                #     pos_y = translate(ymin, 0, 108, 0, 480)
+                #     self.canva.create_oval((pos_x / scale), (pos_y / scale),
+                #                            ((pos_x / scale) + 10),
+                #                            ((pos_y / scale) + 10), fill="white")
+                #
+                #     utils.draw_bounding_box_on_image_array(img_raw, ymin / scale, xmin / scale, ymax / scale,
+                #                                            xmax / scale)
 
                 # uncomment this to resize final image.
                 plt.axis('off')
@@ -67,25 +114,41 @@ class DisplayPhotoEventHandler(FileSystemEventHandler):
                 # else:
                 #     plt.show()
 
-                local_img = ImageTk.PhotoImage(Image.open(output_file_path).resize((1000, 1000)))
-                self.label.configure(image=local_img)
-                self.label.image = local_img
+                local_img = ImageTk.PhotoImage(Image.open(output_file_path))
+                # self.label.configure(image=local_img)
+                # self.label.image = local_img
+                # self.canva.create_oval(5 / scale, 5 / scale, 5 / scale, 5 / scale, fill="black")
 
-            except KeyboardInterrupt:
+                # print('end image processing')
+
+            except Exception as e:
+                print(e)
                 pass
+
+
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)
 
 
 def read_img(path, IM_RESIZE=False):
     f = Image.open(path)
     if IM_RESIZE:
-        f = f.resize((640,480), Image.ANTIALIAS)
+        f = f.resize((640, 480), Image.ANTIALIAS)
 
     f.convert('RGB')
     img_raw = np.asarray(f, dtype=np.uint8)
     img_raw_final = img_raw.copy()
     img = np.asarray(f, dtype=np.float32)
     # _, H, W = img.shape
-    img = img.transpose((2,0,1))
+    img = img.transpose((2, 0, 1))
     _, H, W = img.shape
     img = preprocess(img)
     _, o_H, o_W = img.shape
@@ -94,13 +157,17 @@ def read_img(path, IM_RESIZE=False):
 
 
 def detect(img_path, model_path, watch_file, SAVE_FLAG=0, THRESH=0.01):
-
     # display points -------------
     root = Tk()
-    root.geometry('1200x1200+4200+4200')
-    # root.attributes('-fullscreen', True)
-    root.title("")
-    root.configure(background='black')
+    root.geometry('640x480+1200+1200')
+    # # root.attributes('-fullscreen', True)
+    # root.title("")
+    root.configure(background='red')
+
+    canva = Canvas(root, width=640, height=480, bd=0, relief='ridge')
+    canva.configure(bg='black')
+    canva.configure(highlightthickness=0)
+    canva.pack()
 
     head_detector = Head_Detector_VGG16(ratios=[1], anchor_scales=[2, 4])
     trainer = Head_Detector_Trainer(head_detector).cuda()
@@ -108,10 +175,10 @@ def detect(img_path, model_path, watch_file, SAVE_FLAG=0, THRESH=0.01):
     try:
         img = ImageTk.PhotoImage(Image.open(img_path))
         # img = ImageTk.PhotoImage(Image.open('projector/1.jpg'))
-        label = ttk.Label(root, image=img, borderwidth=0)
-        label.place(x=10, y=10)
+        # label = ttk.Label(root, image=img, borderwidth=0)
+        # label.place(x=10, y=10)
 
-        event_handler = DisplayPhotoEventHandler(label, watch_file, model_path, head_detector, trainer)
+        event_handler = DisplayPhotoEventHandler(canva, watch_file, model_path, head_detector, trainer)
         observer = Observer()
         observer.schedule(event_handler, watch_file, recursive=True)
         observer.start()
@@ -120,6 +187,8 @@ def detect(img_path, model_path, watch_file, SAVE_FLAG=0, THRESH=0.01):
 
     except KeyboardInterrupt:
         pass
+
+    print("-------------------")
 
     try:
         while True:
@@ -131,6 +200,7 @@ def detect(img_path, model_path, watch_file, SAVE_FLAG=0, THRESH=0.01):
     print('end detect')
 
     # -----------------
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
