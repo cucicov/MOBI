@@ -94,11 +94,36 @@ https://askubuntu.com/questions/883109/fatal-error-numpy-arrayobject-h-no-such-f
 https://www.datasciencelearner.com/assertionerror-torch-not-compiled-with-cuda-enabled-fix/
 
 -----
+
+# utils
+cuda version: 
+> nvidia-smi
+> 
+> conda activate mobi_venv
+> 
+pytorch installation with cuda support
+https://pytorch.org/get-started/locally/
+
+#package install
+> conda activate mobi_venv
+> 
+> conda install -c conda-forge cupy
+> 
+> pip install scikit-image
+> 
+> pip install torchnet
+> 
+> pip install opencv-python
+> 
+> pip install watchdog
+> 
+> conda install pytorch==1.12.1 torchvision==1.12.1 torchaudio==1.12.1 cudatoolkit=11.6 -c pytorch -c conda-forge
+
 # start webcam display and saving files for processing
-python webcam.py
+>python webcam.py
 
 # start head detection
-python head_detection_demo.py --img_path input/2.jpg
+>python head_detection_demo.py --img_path input/2.jpg
 
 # display head detection in separate window
-python display.py --watch_file output/2.png
+>python display.py --watch_file output/2.png
