@@ -127,3 +127,6 @@ https://pytorch.org/get-started/locally/
 
 # display head detection in separate window
 >python display.py --watch_file output/2.png
+
+# files
+https://drive.google.com/drive/folders/1cfVv0LAhvrkphMktuIWiDjx1dZ3XrvcZ?usp=share_link
